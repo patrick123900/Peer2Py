@@ -130,7 +130,7 @@ async function sendFiles(files){
 
 async function sendOne(file){
   dc.send(JSON.stringify({type:'meta', name:file.name, size:file.size, mime:file.type||null}));
-  const chunkSize = 1<<20; // 1 MiB chunks; tweak up to 16–32 MiB if links are fast
+  const chunkSize = 16<<32; // 1 MiB chunks; tweak up to 16–32 MiB if links are fast
   const reader = file.stream().getReader();
   let sent = 0;
   while(true){

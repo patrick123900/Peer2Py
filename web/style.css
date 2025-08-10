@@ -1,6 +1,59 @@
-body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu; padding: 24px; }
-main { max-width: 760px; margin: auto; }
-#room input { margin-right: 8px; }
-#room button { margin-right: 8px; }
-#sendProgress div, #recvProgress div { margin: 6px 0; }
-#recvProgress a { display:block; margin:6px 0; }
+:root{
+  --bg: #0b0f15;       --bg2:#0e1520;    --card:#0f1724;   --muted:#9aa7b2;
+  --text:#e6edf3;      --pri:#5b9cff;    --pri-600:#397ff1; --ring: #6aa2ff;
+  --ok:#22c55e;        --warn:#f59e0b;   --err:#ef4444;
+  --br:16px;           --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);font:16px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial}
+
+/* subtle animated background */
+.bg{position:fixed;inset:0;pointer-events:none;opacity:.6;background:radial-gradient(1200px 600px at 10% -10%, #1a2a44, transparent),radial-gradient(900px 500px at 110% 10%, #132439, transparent)}
+.grain{position:absolute;inset:0;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 20 20"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity=".035"/></svg>');mix-blend-mode:soft-light}
+
+.site-header,.site-footer{max-width:980px;margin:18px auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:10px;align-items:center;font-weight:700}
+.logo{width:24px;height:24px;fill:var(--pri)}
+.links a{color:var(--muted);text-decoration:none}
+.links a:hover{color:var(--text)}
+
+.card{max-width:980px;margin:18px auto;padding:24px;border-radius:var(--br);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.005));box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.06)}
+.section+ .section{margin-top:24px;border-top:1px dashed rgba(255,255,255,.08);padding-top:24px}
+.title{margin:0 0 8px;font-size:24px}
+.subtitle{margin:0 0 12px;font-size:20px}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+
+.form-row{display:grid;grid-template-columns:120px 1fr auto;gap:10px;align-items:center;margin:12px 0}
+.label{color:var(--muted)}
+.input{height:44px;border-radius:12px;background:#0e1726;border:1px solid rgba(255,255,255,.08);padding:0 14px;color:var(--text);outline:none}
+.input:focus{border-color:var(--ring);box-shadow:0 0 0 3px rgba(106,162,255,.15)}
+
+.btn{height:44px;border-radius:12px;padding:0 16px;border:1px solid rgba(255,255,255,.1);background:#121b2a;color:var(--text);cursor:pointer}
+.btn:hover{border-color:rgba(255,255,255,.2)}
+.btn.primary{background:linear-gradient(180deg,var(--pri),var(--pri-600));border:none;color:white;box-shadow:0 6px 14px rgba(91,156,255,.3)}
+.btn.primary:disabled{filter:grayscale(.4);opacity:.6;cursor:not-allowed}
+
+.status{margin-top:10px;padding:10px 12px;border-radius:10px;background:#0f1724;border:1px solid rgba(255,255,255,.06)}
+
+.role{display:flex;align-items:center;gap:12px;margin:8px 0 16px}
+.segmented{display:inline-flex;border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden}
+.seg-btn{background:#0f1724;border:none;color:var(--text);padding:10px 14px;cursor:pointer}
+.seg-btn:hover{background:#141f33}
+
+.panel{padding:16px;border-radius:14px;background:#0f1724;border:1px solid rgba(255,255,255,.06)}
+.drop{border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:14px;margin-bottom:12px;background:#0b1322}
+.file-input{width:100%}
+
+.progress-list div{padding:8px 10px;margin:8px 0;border-radius:10px;background:#0b1322;border:1px solid rgba(255,255,255,.06)}
+.progress-list a{display:inline-block;margin:6px 0;padding:8px 10px;border-radius:10px;background:#0b1322;border:1px solid rgba(255,255,255,.06);color:var(--ok);text-decoration:none}
+.progress-list a:hover{border-color:var(--ok)}
+
+.site-footer{justify-content:center;padding-bottom:28px}
+
+/* Make it comfy on narrow screens */
+@media (max-width:720px){
+  .form-row{grid-template-columns:1fr;}
+  .btn{width:100%}
+}

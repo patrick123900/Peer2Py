@@ -1,45 +1,77 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>P2P Share</title>
+  <title>Pi P2P Share</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <main>
-    <h1>Pi P2P Share</h1>
-    <section id="room">
-      <input id="code" placeholder="Room code" maxlength="12" />
-      <input id="pin" placeholder="PIN (optional)" />
-      <button id="create">Create</button>
-      <button id="join">Join</button>
-      <span id="status"></span>
+  <div class="bg">
+    <div class="grain"></div>
+  </div>
+
+  <header class="site-header">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="logo"><path d="M12 2l8 4.5v10.9L12 22l-8-4.6V6.5L12 2zm0 2.2L6 6.3v8.9l6 3.4 6-3.4V6.3l-6-2.1z"/></svg>
+      <span>Pi P2P Share</span>
+    </div>
+    <nav class="links"><a href="#" id="aboutLink" class="muted">About</a></nav>
+  </header>
+
+  <main class="card">
+    <section id="room" class="section">
+      <h1 class="title">Start a session</h1>
+      <p class="muted">Create a one‑time room code and share it with your friend. Optional PIN for extra safety.</p>
+
+      <div class="form-row">
+        <label for="code">Room code</label>
+        <input id="code" class="input" placeholder="e.g. 8K2JQZ" maxlength="12" />
+        <button id="create" class="btn primary">Create</button>
+      </div>
+
+      <div class="form-row">
+        <label for="pin">PIN (optional)</label>
+        <input id="pin" class="input" placeholder="Set a short PIN" />
+        <button id="join" class="btn">Join</button>
+      </div>
+
+      <div class="status" id="status">Connecting…</div>
     </section>
 
-    <section id="xfer" hidden>
-      <div>
-        <label>Role:</label>
-        <button id="asSender">Sender</button>
-        <button id="asReceiver">Receiver</button>
+    <section id="xfer" class="section" hidden>
+      <h2 class="subtitle">Transfer</h2>
+
+      <div class="role">
+        <span class="label">Choose role:</span>
+        <div class="segmented">
+          <button id="asSender" class="seg-btn">Sender</button>
+          <button id="asReceiver" class="seg-btn">Receiver</button>
+        </div>
       </div>
 
-      <div id="senderUI" hidden>
-        <input type="file" id="file" multiple />
-        <button id="send" disabled>Send</button>
-        <div id="sendProgress"></div>
+      <div id="senderUI" class="panel" hidden>
+        <div class="drop">
+          <input type="file" id="file" multiple class="file-input" />
+          <p class="muted small">Select one or more files. They’ll stream directly to your peer.</p>
+        </div>
+        <button id="send" class="btn primary" disabled>Send files</button>
+        <div id="sendProgress" class="progress-list"></div>
       </div>
 
-      <div id="receiverUI" hidden>
-        <div id="recvProgress"></div>
+      <div id="receiverUI" class="panel" hidden>
+        <p class="muted">Waiting for files… you’ll get a download link per file when each completes.</p>
+        <div id="recvProgress" class="progress-list"></div>
       </div>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <span class="muted small">Direct P2P via WebRTC • Signaling on your Pi • No file storage on server</span>
+  </footer>
+
   <script>
-    window.APP_CFG = {
-      stunServers: [ { urls: (window.DEFAULT_STUN||'stun:stun.l.google.com:19302') } ],
-      // If you run TURN, add here: { urls:'turns:your.turn:5349', username:'u', credential:'p' }
-    };
+    window.APP_CFG = { stunServers: [ { urls: (window.DEFAULT_STUN||'stun:stun.l.google.com:19302') } ] };
   </script>
   <script src="/static/app.js"></script>
 </body>
