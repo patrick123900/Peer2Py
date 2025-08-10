@@ -10,7 +10,7 @@ load_dotenv()
 
 ROOM_CODE_LENGTH = int(os.getenv("ROOM_CODE_LENGTH", 6))
 ROOM_TTL_SECONDS = int(os.getenv("ROOM_TTL_SECONDS", 1200))
-MAX_ROOMS = int(os.getenv("MAX_ROOMS", 500))
+MAX_ROOMS = int(os.getenv("MAX_ROOMS", 10))
 PIN_REQUIRED = os.getenv("PIN_REQUIRED", "false").lower() == "true"
 
 app = FastAPI()
