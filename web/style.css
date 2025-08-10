@@ -1,0 +1,6 @@
+body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu; padding: 24px; }
+main { max-width: 760px; margin: auto; }
+#room input { margin-right: 8px; }
+#room button { margin-right: 8px; }
+#sendProgress div, #recvProgress div { margin: 6px 0; }
+#recvProgress a { display:block; margin:6px 0; }

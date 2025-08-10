@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>P2P Share</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main>
+    <h1>Pi P2P Share</h1>
+    <section id="room">
+      <input id="code" placeholder="Room code" maxlength="12" />
+      <input id="pin" placeholder="PIN (optional)" />
+      <button id="create">Create</button>
+      <button id="join">Join</button>
+      <span id="status"></span>
+    </section>
+
+    <section id="xfer" hidden>
+      <div>
+        <label>Role:</label>
+        <button id="asSender">Sender</button>
+        <button id="asReceiver">Receiver</button>
+      </div>
+
+      <div id="senderUI" hidden>
+        <input type="file" id="file" multiple />
+        <button id="send" disabled>Send</button>
+        <div id="sendProgress"></div>
+      </div>
+
+      <div id="receiverUI" hidden>
+        <div id="recvProgress"></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    window.APP_CFG = {
+      stunServers: [ { urls: (window.DEFAULT_STUN||'stun:stun.l.google.com:19302') } ],
+      // If you run TURN, add here: { urls:'turns:your.turn:5349', username:'u', credential:'p' }
+    };
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
