@@ -59,7 +59,7 @@ $('#asSender').onclick = async () => {
   role = 'sender';
   $('#senderUI').hidden = false; $('#receiverUI').hidden = true;
   await ensurePC();
-  dc = pc.createDataChannel('file', { ordered: true });
+  dc = pc.createDataChannel('file', { ordered: false });
   setupDC();
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
@@ -87,7 +87,7 @@ async function ensurePC(){
 
 function setupDC(){
   dc.binaryType = 'arraybuffer';
-  dc.bufferedAmountLowThreshold = 1<<20; // 1 MiB low-watermark
+  dc.bufferedAmountLowThreshold = 512 * 1024; // 512 KiB
   dc.onopen = () => setStatus('DataChannel open');
   dc.onclose = cleanup;
   if (role === 'receiver') {
@@ -129,25 +129,49 @@ async function sendFiles(files){
 }
 
 async function sendOne(file){
-  dc.send(JSON.stringify({type:'meta', name:file.name, size:file.size, mime:file.type||null}));
-  const chunkSize = 16<<32; // 1 MiB chunks; tweak up to 16–32 MiB if links are fast
+  const chunkSize = 64 * 1024; // 64 KiB chunks
+  let seq = 0;
+
+  // Send metadata first
+  dc.send(JSON.stringify({
+    type: 'meta',
+    name: file.name,
+    size: file.size,
+    mime: file.type || null,
+    chunkSize
+  }));
+
   const reader = file.stream().getReader();
   let sent = 0;
+
   while(true){
     const {value, done} = await reader.read();
     if (done) break;
+
     let off = 0;
     while (off < value.byteLength){
       // backpressure
-      while (dc.bufferedAmount > (8<<20)){
+      while (dc.bufferedAmount > (2 * 1024 * 1024)){
         await once(dc, 'bufferedamountlow');
       }
-      const slice = value.subarray(off, Math.min(off+chunkSize, value.byteLength));
+
+      const slice = value.subarray(off, Math.min(off + chunkSize, value.byteLength));
+
+      // send sequence number header (4 bytes, Uint32)
+      dc.send(new Uint32Array([seq]).buffer);
+
+      // send the actual chunk
       dc.send(slice);
-      off += slice.byteLength; sent += slice.byteLength;
+
+      off += slice.byteLength;
+      sent += slice.byteLength;
+      seq++;
+
       updateSendProgress(file.name, sent, file.size);
     }
   }
+
+  // End marker
   dc.send(JSON.stringify({type:'end'}));
 }
 
@@ -165,3 +189,20 @@ function cleanup(){
   if (pc){ try{ pc.close(); }catch{} }
   dc = null; pc = null; setStatus('Peer disconnected');
 }
+
+async function logSelectedRoute(pc){
+  const stats = await pc.getStats();
+  let pair, local, remote;
+  stats.forEach(s => { if (s.type === 'transport' && s.selectedCandidatePairId) pair = stats.get(s.selectedCandidatePairId); });
+  if (!pair) stats.forEach(s => { if (s.type === 'candidate-pair' && s.nominated) pair = s; });
+  if (pair) { local = stats.get(pair.localCandidateId); remote = stats.get(pair.remoteCandidateId); }
+  if (local && remote) {
+    console.info('[ICE]',
+      { localType: local.candidateType, localProto: local.protocol, localAddr: local.ip, localPort: local.port,
+        remoteType: remote.candidateType, remoteProto: remote.protocol, remoteAddr: remote.ip, remotePort: remote.port });
+  } else {
+    console.info('[ICE] route not selected yet');
+  }
+}
+// call it when dc.onopen fires, and maybe every 5s:
+dc.onopen = () => { setStatus('DataChannel open'); logSelectedRoute(pc); setInterval(()=>logSelectedRoute(pc), 5000); };
