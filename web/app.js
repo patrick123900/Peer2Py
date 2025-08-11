@@ -59,7 +59,7 @@ $('#asSender').onclick = async () => {
   role = 'sender';
   $('#senderUI').hidden = false; $('#receiverUI').hidden = true;
   await ensurePC();
-  dc = pc.createDataChannel('file', { ordered: false });
+  dc = pc.createDataChannel('file', { ordered: true });
   setupDC();
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
@@ -129,49 +129,25 @@ async function sendFiles(files){
 }
 
 async function sendOne(file){
-  const chunkSize = 64 * 1024; // 64 KiB chunks
-  let seq = 0;
-
-  // Send metadata first
-  dc.send(JSON.stringify({
-    type: 'meta',
-    name: file.name,
-    size: file.size,
-    mime: file.type || null,
-    chunkSize
-  }));
-
+  dc.send(JSON.stringify({type:'meta', name:file.name, size:file.size, mime:file.type||null}));
+  const chunkSize = 1<<20; // 1 MiB chunks; tweak up to 16–32 MiB if links are fast
   const reader = file.stream().getReader();
   let sent = 0;
-
   while(true){
     const {value, done} = await reader.read();
     if (done) break;
-
     let off = 0;
     while (off < value.byteLength){
       // backpressure
-      while (dc.bufferedAmount > (2 * 1024 * 1024)){
+      while (dc.bufferedAmount > (8<<20)){
         await once(dc, 'bufferedamountlow');
       }
-
-      const slice = value.subarray(off, Math.min(off + chunkSize, value.byteLength));
-
-      // send sequence number header (4 bytes, Uint32)
-      dc.send(new Uint32Array([seq]).buffer);
-
-      // send the actual chunk
+      const slice = value.subarray(off, Math.min(off+chunkSize, value.byteLength));
       dc.send(slice);
-
-      off += slice.byteLength;
-      sent += slice.byteLength;
-      seq++;
-
+      off += slice.byteLength; sent += slice.byteLength;
       updateSendProgress(file.name, sent, file.size);
     }
   }
-
-  // End marker
   dc.send(JSON.stringify({type:'end'}));
 }
 
